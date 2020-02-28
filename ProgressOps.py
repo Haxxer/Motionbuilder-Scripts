@@ -19,7 +19,17 @@ class ExternalProgressBar():
     def set_percentage(self, inPercentage):
         if self._percentage != inPercentage:
             self._percentage = inPercentage
-            self.socket.sendall(self._percentage)
+
+            #In case the connection dropped, wrap in try
+            try:
+                # Send percentage to socket and wait for reply
+                self.socket.sendall(self._percentage)
+                self.socket.recv(3)
+            except:
+                pass
 
     def __exit__(self, inType, inValue, inTraceback):
-        self.socket.close()
+        try:
+            self.socket.close()
+        except:
+            pass
