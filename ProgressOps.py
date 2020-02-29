@@ -1,6 +1,5 @@
 import socket
 import os
-import math
 
 class ExternalProgressBar():
 

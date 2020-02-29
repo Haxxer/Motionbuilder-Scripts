@@ -2,6 +2,24 @@ import socket
 import os
 import math
 
+def display(data):
+
+	perc = int(data)
+
+	done = int(math.floor(float(perc)/2))
+	to_go = 50-done
+
+	message = '['
+	for i in range(done):
+	    message += '\u2588'
+
+	for i in range(to_go):
+	    message += ' '
+
+	message += '] {0}%'.format(perc)
+
+	return message
+
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -13,39 +31,37 @@ sock.listen(1)
 
 prev_message = ""
 
-# While the socket is running
+print('[                                                  ] 0%')
+
 while True:
-	# Accept incoming connections
+
 	connection, client_address = sock.accept()
 
 	try:
-		# Receive the data in small chunks and retransmit it
+
 		while True:
 
-			# Accept chunks of 3 bits (enough for 0-100 progress)
-			message = connection.recv(3)
+			inc_data = connection.recv(1024)
 
-			if message:
+			if inc_data:
 
-				perc = int(message.decode("utf-8"))
+				data = inc_data.decode("utf-8")
 
-				done = int(math.floor(float(perc)/10))
-				to_go = 10-done
+				if len(data) > 3:
 
-				message = '['
-				for i in range(done):
-				    message += '\u2588'
+					split_data = [data[i:i+3] for i in range(0, len(data), 3)]
 
-				for i in range(to_go):
-				    message += ' '
+					for data in split_data:
+						message = display(data)
+						if message != prev_message:
+							# Clear last message and print a new one
+							print(message)
 
-				message += ']'
-
-				if message != prev_message:
-					prev_message = message
-					# Clear last message and print a new one
-					os.system('cls')
-					print(message)
+				else:
+					message = display(data)
+					if message != prev_message:
+						# Clear last message and print a new one
+						print(message)
 
 			else:
 				break
