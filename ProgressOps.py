@@ -1,5 +1,6 @@
 import socket
 import os
+import math
 
 class ExternalProgressBar():
 
@@ -17,14 +18,23 @@ class ExternalProgressBar():
         self._percentage = b""
     
     def set_percentage(self, inPercentage):
+
         if self._percentage != inPercentage:
+
             self._percentage = inPercentage
 
             #In case the connection dropped, wrap in try
             try:
-                # Send percentage to socket and wait for reply
-                self.socket.sendall(self._percentage)
-                self.socket.recv(3)
+
+                if self._percentage < 10:
+                    message = b'00{prc}'.format(prc=self._percentage)
+                elif self._percentage < 100:
+                    message = b'0{prc}'.format(prc=self._percentage)
+                else:
+                    message = b'{prc}'.format(prc=self._percentage)
+
+                self.socket.sendall(message)
+
             except:
                 pass
 

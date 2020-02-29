@@ -11,14 +11,7 @@ sock.bind(server_address)
 
 sock.listen(1)
 
-message = "["
-for i in range(50):
-	message += ' '
-message += '] 0% Done'
-
-print("If you accidentally press this window, you can right click to unpause.")
-print("")
-print(message)
+prev_message = ""
 
 # While the socket is running
 while True:
@@ -30,29 +23,29 @@ while True:
 		while True:
 
 			# Accept chunks of 3 bits (enough for 0-100 progress)
-			percentage = connection.recv(3)
+			message = connection.recv(3)
 
-			if percentage:
-				done = int(math.floor(float(percentage)/2))
-				to_go = 50-done
+			if message:
+
+				perc = int(message.decode("utf-8"))
+
+				done = int(math.floor(float(perc)/10))
+				to_go = 10-done
 
 				message = '['
 				for i in range(done):
-					message += '\u2588'
+				    message += '\u2588'
 
 				for i in range(to_go):
-					message += ' '
+				    message += ' '
 
-				message += '] {0}% Done'.format(int(percentage))
+				message += ']'
 
-				# Send a reply so that owning script can continue
-				connection.sendall(percentage)
-
-				# Clear last message and print a new one
-				os.system('cls')
-				print("If you accidentally press this window, you can right click to unpause.")
-				print("")
-				print(message)
+				if message != prev_message:
+					prev_message = message
+					# Clear last message and print a new one
+					os.system('cls')
+					print(message)
 
 			else:
 				break
